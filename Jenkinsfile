@@ -1,4 +1,4 @@
 angularNodejsStaticPagesPipeline {
-    serviceName = "operations-portal-reactjs"
+    serviceName = "mifos-web-app"
 
 }
