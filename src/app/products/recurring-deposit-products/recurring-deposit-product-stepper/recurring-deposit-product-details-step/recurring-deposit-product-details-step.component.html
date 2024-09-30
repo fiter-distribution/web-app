@@ -12,7 +12,7 @@
 
     <mat-form-field fxFlex="48%">
       <mat-label>{{'labels.inputs.Short Name' | translate}}</mat-label>
-      <input matInput formControlName="shortName" maxlength="4"  matTooltip="{{ 'tooltips.Short name is a unique identifier' | translate}}" required>
+      <input matInput formControlName="shortName" maxlength="20"  matTooltip="{{ 'tooltips.Short name is a unique identifier' | translate}}" required>
       <mat-error *ngIf="recurringDepositProductDetailsForm.controls.shortName.hasError('required')">
         {{'labels.inputs.Short Name' | translate}} {{'labels.commons.is' | translate}} <strong>{{'labels.commons.required' | translate}}</strong>
       </mat-error>
