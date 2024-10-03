@@ -39,7 +39,7 @@
             </mat-select>
           </mat-form-field>
 
-          <mifosx-gl-account-selector *ngIf="debitAccountData.length > 0"
+          <mifosx-gl-account-selector *ngIf="debitAccountData && debitAccountData.length > 0"
             [inputFormControl]="taxComponentForm.controls.debitAcountId"
             [glAccountList]="debitAccountData" [required]="false" [inputLabel]="'Credit Account'">
           </mifosx-gl-account-selector>
@@ -53,7 +53,7 @@
             </mat-select>
           </mat-form-field>
 
-          <mifosx-gl-account-selector *ngIf="creditAccountData.length > 0"
+          <mifosx-gl-account-selector *ngIf="creditAccountData && creditAccountData.length > 0"
             [inputFormControl]="taxComponentForm.controls.creditAcountId"
             [glAccountList]="creditAccountData" [required]="false" [inputLabel]="'Credit Account'">
           </mifosx-gl-account-selector>

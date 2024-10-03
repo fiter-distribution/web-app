@@ -51,19 +51,19 @@ export class ErrorHandlerInterceptor implements HttpInterceptor {
     }
 
     if (status === 401 || (environment.oauth.enabled && status === 400)) {
-      this.alertService.alert({ type: 'Authentication Error', message: 'Invalid User Details. Please try again!' });
-    } else if (status === 403 && errorMessage === 'The provided one time token is invalid') {
-      this.alertService.alert({ type: 'Invalid Token', message: 'Invalid Token. Please try again!' });
+      this.alertService.alert({ type: 'Authentication Error', message: 'Invalid User Details. Please try again!', duration: 5000 });
+    } else if (status === 403 && errorMessage === 'The provided one time token is invalid' ) {
+      this.alertService.alert({ type: 'Invalid Token', message: 'Invalid Token. Please try again!' , duration: 5000 });
     } else if (status === 400) {
-      this.alertService.alert({ type: 'Bad Request', message: errorMessage || 'Invalid parameters were passed in the request!' });
+      this.alertService.alert({ type: 'Bad Request', message: errorMessage || 'Invalid parameters were passed in the request!' , duration: 5000});
     } else if (status === 403) {
-      this.alertService.alert({ type: 'Unauthorized Request', message: errorMessage || 'You are not authorized for this request!' });
+      this.alertService.alert({ type: 'Unauthorized Request', message: errorMessage || 'You are not authorized for this request!' , duration: 5000});
     } else if (status === 404) {
-      this.alertService.alert({ type: 'Resource does not exist', message: errorMessage || 'Resource does not exist!' });
+      this.alertService.alert({ type: 'Resource does not exist', message: errorMessage || 'Resource does not exist!' , duration: 5000});
     }  else if (status === 500) {
-      this.alertService.alert({ type: 'Internal Server Error', message: 'Internal Server Error. Please try again later.' });
+      this.alertService.alert({ type: 'Internal Server Error', message: 'Internal Server Error. Please try again later.' , duration: 5000});
     } else {
-      this.alertService.alert({ type: 'Unknown Error', message: 'Unknown Error. Please try again later.' });
+      this.alertService.alert({ type: 'Unknown Error', message: 'Unknown Error. Please try again later.' , duration: 5000});
     }
 
     throw response;
