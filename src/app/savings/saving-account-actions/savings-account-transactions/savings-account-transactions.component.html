@@ -27,7 +27,7 @@
 
         <mat-form-field>
           <mat-label>{{'labels.inputs.Payment Type' | translate}}</mat-label>
-          <mat-select required formControlName="paymentTypeId">
+          <mat-select formControlName="paymentTypeId">
             <mat-option *ngFor="let paymentType of paymentTypeOptions" [value]="paymentType.id">
               {{ paymentType.name }}
             </mat-option>
