@@ -85,8 +85,8 @@ export class SavingsAccountTransactionsComponent implements OnInit {
       'transactionDate': [this.settingsService.businessDate, Validators.required],
       'transactionAmount': [0, Validators.required],
       'paymentTypeId': [''],
-      'note': [''],
-      'uniqueTransactionReference': ['']
+      'narration': [''],
+      'reference': ['']
     });
   }
 
