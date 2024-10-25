@@ -105,6 +105,7 @@ export class MakeAccountTransfersComponent implements OnInit, AfterViewInit {
       'transferAmount': [this.accountTransferTemplateData.transferAmount, Validators.required],
       'transferDate': [this.settingsService.businessDate, Validators.required],
       'transferDescription': ['', Validators.required],
+      'reference': [''],
     });
   }
 
@@ -175,6 +176,7 @@ export class MakeAccountTransfersComponent implements OnInit, AfterViewInit {
   submit() {
     const dateFormat = this.settingsService.dateFormat;
     const locale = this.settingsService.language.code;
+    console.log("- . . .  Account Transfer . . . -"+this.makeAccountTransferForm.value.reference);
     const makeAccountTransferData = {
       ... this.makeAccountTransferForm.value,
       transferDate: this.dateUtils.formatDate(this.makeAccountTransferForm.value.transferDate, dateFormat),
