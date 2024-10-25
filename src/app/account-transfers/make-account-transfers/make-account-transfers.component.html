@@ -116,9 +116,14 @@
           </mat-form-field>
 
           <mat-form-field fxFlex="98%">
+            <mat-label>{{"labels.inputs.Unique Transaction Reference" | translate}}</mat-label>
+            <input matInput formControlName="reference" />
+          </mat-form-field>
+
+          <mat-form-field fxFlex="98%">
             <mat-label>{{"labels.inputs.Description" | translate}}</mat-label>
             <textarea matInput formControlName="transferDescription" cdkTextareaAutosize
-              cdkAutosizeMinRows="2"></textarea>
+                      cdkAutosizeMinRows="2"></textarea>
             <mat-error *ngIf="makeAccountTransferForm.controls.transferDescription.hasError('required')">
               {{"labels.inputs.Transfer Description" | translate}} {{"labels.commons.is" | translate}} <strong>{{"labels.commons.required" | translate}}</strong>
             </mat-error>
