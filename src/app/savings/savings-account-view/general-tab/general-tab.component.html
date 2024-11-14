@@ -16,6 +16,15 @@
             </td>
             <td *ngIf="!savingsAccountData.externalId">{{'labels.inputs.Not Provided' | translate}}</td>
           </tr>
+
+          <tr>
+            <td>{{'labels.inputs.Account Name' | translate}}</td>
+            <td *ngIf="savingsAccountData.accountName">
+              <mifosx-external-identifier externalId="{{savingsAccountData.accountName}}"></mifosx-external-identifier>
+            </td>
+            <td *ngIf="!savingsAccountData.accountName">{{'labels.inputs.Not Provided' | translate}}</td>
+          </tr>
+
           <tr>
             <td>{{'labels.inputs.Activated On' | translate}}</td>
             <td>{{savingsAccountData.timeline.activatedOnDate ? (savingsAccountData.timeline.activatedOnDate |
