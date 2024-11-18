@@ -22,7 +22,7 @@ export class GeneralTabComponent {
   /** Open Savings Accounts Columns */
   openSavingsColumns: string[] = ['Account No', 'Account Name' , 'Saving Account', 'Last Active', 'Balance', 'Actions'];
   /** Closed Savings Accounts Columns */
-  closedSavingsColumns: string[] = ['Account No', 'Saving Account', 'Closed Date'];
+  closedSavingsColumns: string[] = ['Account No','Account Name', 'Saving Account', 'Closed Date'];
   /** Open Shares Accounts Columns */
   openSharesColumns: string[] = ['Account No', 'Share Account', 'Approved Shares', 'Pending For Approval Shares', 'Actions'];
   /** Closed Shares Accounts Columns */
