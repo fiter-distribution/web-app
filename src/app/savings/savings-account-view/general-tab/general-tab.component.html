@@ -19,10 +19,10 @@
 
           <tr>
             <td>{{'labels.inputs.Account Name' | translate}}</td>
-            <td *ngIf="savingsAccountData.accountName">
+            <td *ngIf="savingsAccountData?.accountName">
               <mifosx-external-identifier externalId="{{savingsAccountData.accountName}}"></mifosx-external-identifier>
             </td>
-            <td *ngIf="!savingsAccountData.accountName">{{'labels.inputs.Not Provided' | translate}}</td>
+            <td *ngIf="!savingsAccountData?.accountName">{{'labels.inputs.Not Provided' | translate}}</td>
           </tr>
 
           <tr>
