@@ -211,7 +211,7 @@ export class WebAppComponent implements OnInit {
     this.settingsService.setServers(environment.baseApiUrls.split(','));
     // Set the Tenant Identifier(s) list from the env var
     if (!localStorage.getItem('mifosXTenantIdentifier')) {
-      this.settingsService.setTenantIdentifier(environment.fineractPlatformTenantId || 'default');
+      this.settingsService.setTenantIdentifier(environment.fineractPlatformTenantId || 'FinanceHouse');
     }
     this.settingsService.setTenantIdentifiers(environment.fineractPlatformTenantIds.split(','));
 
