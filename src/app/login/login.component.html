@@ -10,7 +10,7 @@
     This content will be hidden for smaller screens.
   -->
 
-  <div fxLayout="column" fxFlex.gt-sm="1 0 30%" class="login-container">
+  <div fxLayout="column" fxFlex="100%" class="login-container">
 
     <!-- Language Selector to the extreme right -->
     <div fxLayout="row-reverse" fxFlex="1 0 auto">
@@ -37,7 +37,7 @@
         Two Factor Authentication
         Forgot Password (TODO: Decision to be taken on providing this feature.)
     -->
-    <div fxLayout="row" fxFlex="20 0 auto" fxLayoutAlign="center start">
+    <div fxLayout="row" fxFlex="3 0 auto" fxLayoutAlign="center start">
       <mifosx-login-form *ngIf="!resetPassword && !twoFactorAuthenticationRequired"></mifosx-login-form>
       <mifosx-reset-password *ngIf="resetPassword"></mifosx-reset-password>
       <mifosx-two-factor-authentication *ngIf="twoFactorAuthenticationRequired"></mifosx-two-factor-authentication>
