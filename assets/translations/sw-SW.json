@@ -737,11 +737,13 @@
       "Add periodic accrual entries": "Ongeza maingizo ya mara kwa mara",
       "Accrual Activity Posting on Installment Due Date": "Shughuli ya Accrual Inachapisha Tarehe ya Kukamilisha Malipo ya Malipo",
       "Check loan repayment due": "Angalia ulipaji wa mkopo unaodaiwa",
-      "Transfer to Savings": "Hamisha kwa Akiba"
+      "Transfer to Savings": "Hamisha kwa Akiba",
+      "Zero interest after charge-off": "Riba sifuri baada ya kutozwa",
+      "Accelerate maturity to charge-off date": "Kuharakisha ukomavu hadi tarehe ya kukomesha malipo"
     },
     "commons": {
       "50 characters long": "Urefu wa herufi 50",
-      "8 characters long": "Urefu wa herufi 8",
+      "12 characters long": "Urefu wa herufi 12",
       "Amount must be": "Kiasi lazima kiwe",
       "At least one restricted product": "Angalau bidhaa moja iliyozuiliwa",
       "At least one role": "Angalau jukumu moja",
@@ -1104,6 +1106,7 @@
       "Template Parameters": "Vigezo vya Kigezo",
       "Term Options": "Chaguzi za Muda",
       "Terms": "Masharti",
+      "Term Variations": "Tofauti za Muda",
       "Total Withdrawals": "Jumla ya Pesa",
       "Transaction Details": "Maelezo ya Muamala",
       "Transaction Reverted": "Muamala Umerejeshwa",
@@ -1132,7 +1135,8 @@
       "Working Days": "Siku za kazi",
       "You have created": "Umeunda",
       "You can drag and drop the rows to set a Payment Allocations order": "Unaweza kuburuta na kudondosha safu mlalo ili kuweka agizo la Ugawaji wa Malipo",
-      "successfully select option": "kwa mafanikio. Tafadhali chagua kutoka kwa chaguo zilizo hapa chini ili kuendelea zaidi."
+      "successfully select option": "kwa mafanikio. Tafadhali chagua kutoka kwa chaguo zilizo hapa chini ili kuendelea zaidi.",
+      "Map Charge-off reasons to Expense accounts": "Sababu za Kutozwa kwa Ramani kwa akaunti za Gharama"
     },
     "inputs": {
       "accounting": {
@@ -1503,6 +1507,7 @@
       "Dividend Period End Date": "Tarehe ya Mwisho ya Kipindi cha Gawio",
       "Dividend Period Start Date": "Tarehe ya Kuanza kwa Kipindi cha Gawio",
       "Dividends": "Gawio",
+      "Do not calculate interest on past due principal balances": "Usihesabu riba juu ya salio la msingi lililokawia",
       "Documents": "Nyaraka",
       "Document Key": "Ufunguo wa Hati",
       "Document Type": "Aina ya Hati",
@@ -1788,6 +1793,7 @@
       "Loan Amount and Balance": "Kiasi cha Mkopo na Salio",
       "Loan Approval": "Idhini ya Mkopo",
       "Loan Balance": "Salio la Mkopo",
+      "Loan Charge-off behaviour": "Tabia ya kutoza mkopo",
       "Loan Collateral Details": "Maelezo ya Dhamana ya Mkopo",
       "Loan Cycle": "Mzunguko wa mkopo",
       "Loan Disbursal": "Utoaji wa mkopo",
@@ -2224,6 +2230,7 @@
       "Show Closed Centers": "Onyesha Vituo Vilivyofungwa",
       "Show Closed Groups": "Onyesha Vikundi Vilivyofungwa",
       "Show Payment Details": "Onyesha Maelezo ya Malipo",
+      "Specific to Installment": "Maalum kwa Installment",
       "Staff": "Wafanyakazi",
       "Standing Instruction": "Maagizo ya Kudumu",
       "Standing Instruction Type": "Aina ya Maagizo ya Kudumu",
@@ -2268,6 +2275,7 @@
       "Tenant": "Mpangaji",
       "Tenant App Key": "Ufunguo wa Programu ya Mpangaji",
       "Tenant Id": "Kitambulisho cha Mpangaji",
+      "Term Variations": "Tofauti za Muda",
       "Terms vary based on loan cycle": "Masharti yanatofautiana kulingana na mzunguko wa mkopo",
       "Text": "Maandishi",
       "Theme": "Mandhari",
@@ -2419,7 +2427,8 @@
       "valid": "halali",
       "INTEREST REFUND": "MAREJESHO YA RIBA",
       "Supported Interest Refund Types": "Aina za Urejeshaji wa Riba Zinazotumika",
-      "SUPPORTED REFUND TRANSACTIONS FOR INTEREST REFUND": "Aina za kurejesha riba zinazotumika"
+      "SUPPORTED REFUND TRANSACTIONS FOR INTEREST REFUND": "Aina za kurejesha riba zinazotumika",
+      "Charge-off reason": "Sababu ya malipo"
     },
     "links": {
       "Community": "Jumuiya",

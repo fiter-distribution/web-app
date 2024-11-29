@@ -737,11 +737,13 @@
       "Add periodic accrual entries": "आवधिक संचय प्रविष्टिहरू थप्नुहोस्",
       "Accrual Activity Posting on Installment Due Date": "किस्ता तिर्ने मितिमा उपार्जन गतिविधि पोस्ट गर्दै",
       "Check loan repayment due": "ऋण तिर्न बाँकी जाँच गर्नुहोस्",
-      "Transfer to Savings": "बचतमा स्थानान्तरण गर्नुहोस्"
+      "Transfer to Savings": "बचतमा स्थानान्तरण गर्नुहोस्",
+      "Zero interest after charge-off": "चार्ज अफ पछि शून्य ब्याज",
+      "Accelerate maturity to charge-off date": "चार्ज अफ मितिमा परिपक्वतालाई गति दिनुहोस्"
     },
     "commons": {
       "50 characters long": "५० वर्ण लामो",
-      "8 characters long": "8 वर्ण लामो",
+      "12 characters long": "12 वर्ण लामो",
       "Amount must be": "रकम हुनुपर्छ",
       "At least one restricted product": "कम्तिमा एक प्रतिबन्धित उत्पादन",
       "At least one role": "कम्तिमा एक भूमिका",
@@ -1104,6 +1106,7 @@
       "Template Parameters": "टेम्प्लेट प्यारामिटरहरू",
       "Term Options": "टर्म विकल्प",
       "Terms": "सर्तहरू",
+      "Term Variations": "अवधि भिन्नताहरू",
       "Total Withdrawals": "कुल निकासी",
       "Transaction Details": "लेनदेन विवरण",
       "Transaction Reverted": "कारोबार फिर्ता गरियो",
@@ -1132,7 +1135,8 @@
       "Working Days": "काम गर्ने दिनहरू",
       "You have created": "तपाईंले सिर्जना गर्नुभयो",
       "You can drag and drop the rows to set a Payment Allocations order": "तपाईंले भुक्तानी आवंटन आदेश सेट गर्न पङ्क्तिहरू तान्नुहोस् र छोड्न सक्नुहुन्छ",
-      "successfully select option": "सफलतापूर्वक। अगाडि बढ्नको लागि कृपया तलका विकल्पहरूबाट चयन गर्नुहोस्।"
+      "successfully select option": "सफलतापूर्वक। अगाडि बढ्नको लागि कृपया तलका विकल्पहरूबाट चयन गर्नुहोस्।",
+      "Map Charge-off reasons to Expense accounts": "खर्च खाताहरूमा चार्ज-अफ कारणहरू नक्सा गर्नुहोस्"
     },
     "inputs": {
       "accounting": {
@@ -1503,6 +1507,7 @@
       "Dividend Period End Date": "लाभांश अवधि समाप्ति मिति",
       "Dividend Period Start Date": "लाभांश अवधि सुरु मिति",
       "Dividends": "लाभांश",
+      "Do not calculate interest on past due principal balances": "बकाया मूल चित्तको ब्याज गणना नगर्नुहोस्।",
       "Documents": "कागजातहरू",
       "Document Key": "कागजात कुञ्जी",
       "Document Type": "कागजात प्रकार",
@@ -1788,6 +1793,7 @@
       "Loan Amount and Balance": "ऋण रकम र मौज्दात",
       "Loan Approval": "ऋण स्वीकृति",
       "Loan Balance": "ऋण शेष",
+      "Loan Charge-off behaviour": "ऋण चार्ज अफ व्यवहार",
       "Loan Collateral Details": "ऋण संपार्श्विक विवरण",
       "Loan Cycle": "ऋण चक्र",
       "Loan Disbursal": "ऋण वितरण",
@@ -2224,6 +2230,7 @@
       "Show Closed Centers": "बन्द केन्द्रहरू देखाउनुहोस्",
       "Show Closed Groups": "बन्द समूहहरू देखाउनुहोस्",
       "Show Payment Details": "भुक्तानी विवरणहरू देखाउनुहोस्",
+      "Specific to Installment": "किस्ताको लागि विशिष्ट",
       "Staff": "कर्मचारी",
       "Standing Instruction": "स्थायी निर्देशन",
       "Standing Instruction Type": "स्थायी निर्देशन प्रकार",
@@ -2268,6 +2275,7 @@
       "Tenant": "भाँडादार",
       "Tenant App Key": "टेनेन्ट एप कुञ्जी",
       "Tenant Id": "टेनेन्ट आईडी",
+      "Term Variations": "अवधि भिन्नताहरू",
       "Terms vary based on loan cycle": "ऋण चक्रको आधारमा सर्तहरू भिन्न हुन्छन्",
       "Text": "पाठ",
       "Theme": "विषयवस्तु",
@@ -2419,7 +2427,8 @@
       "valid": "मान्य",
       "INTEREST REFUND": "व्याज परतावा",
       "Supported Interest Refund Types": "समर्थित ब्याज फिर्ता प्रकारहरू",
-      "SUPPORTED REFUND TRANSACTIONS FOR INTEREST REFUND": "समर्थित व्याज परतावा प्रकार"
+      "SUPPORTED REFUND TRANSACTIONS FOR INTEREST REFUND": "समर्थित व्याज परतावा प्रकार",
+      "Charge-off reason": "चार्ज अफ कारण"
     },
     "links": {
       "Community": "समुदाय",

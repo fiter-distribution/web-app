@@ -739,11 +739,13 @@
             "Add periodic accrual entries": "Add periodic accrual entries",
             "Accrual Activity Posting on Installment Due Date": "Accrual Activity Posting on Installment Due Date",
             "Check loan repayment due": "Check loan repayment due",
-            "Transfer to Savings": "Transfer to Savings"
+            "Transfer to Savings": "Transfer to Savings",
+            "Zero interest after charge-off": "Zero interest after charge-off",
+            "Accelerate maturity to charge-off date": "Accelerate maturity to charge-off date"
         },
         "commons": {
             "50 characters long": "50 characters long",
-            "8 characters long": "8 characters long",
+            "12 characters long": "12 characters long",
             "Amount must be": "Amount must be",
             "At least one restricted product": "At least one restricted product",
             "At least one role": "At least one role",
@@ -1105,6 +1107,7 @@
             "Template Parameters": "Template Parameters",
             "Term Options": "Term Options",
             "Terms": "Terms",
+            "Term Variations": "Term Variations",
             "Total Withdrawals": "Total Withdrawals",
             "Transaction Details": "Transaction Details",
             "Transaction Reverted": "Transaction Reverted",
@@ -1133,7 +1136,8 @@
             "Working Days": "Working Days",
             "You have created": "You have created",
             "You can drag and drop the rows to set a Payment Allocations order": "You can drag and drop the rows to set a Payment Allocations order",
-            "successfully select option": "successfully. Please select from the options below to proceed furthur."
+            "successfully select option": "successfully. Please select from the options below to proceed further.",
+            "Map Charge-off reasons to Expense accounts": "Map Charge-off reasons to Expense accounts"
         },
         "inputs": {
             "accounting": {
@@ -1504,6 +1508,7 @@
             "Dividend Period End Date": "Dividend Period End Date",
             "Dividend Period Start Date": "Dividend Period Start Date",
             "Dividends": "Dividends",
+            "Do not calculate interest on past due principal balances": "Do not calculate interest on past due principal balances",
             "Documents": "Documents",
             "Document Key": "Document Key",
             "Document Type": "Document Type",
@@ -1789,6 +1794,7 @@
             "Loan Amount and Balance": "Loan Amount and Balance",
             "Loan Approval": "Loan Approval",
             "Loan Balance": "Loan Balance",
+            "Loan Charge-off behaviour": "Loan Charge-off behaviour",
             "Loan Collateral Details": "Loan Collateral Details",
             "Loan Cycle": "Loan Cycle",
             "Loan Disbursal": "Loan Disbursal",
@@ -2225,6 +2231,7 @@
             "Show Closed Centers": "Show Closed Centers",
             "Show Closed Groups": "Show Closed Groups",
             "Show Payment Details": "Show Payment Details",
+            "Specific to Installment": "Specific to Installment",
             "Staff": "Staff",
             "Standing Instruction": "Standing Instruction",
             "Standing Instruction Type": "Standing Instruction Type",
@@ -2269,6 +2276,7 @@
             "Tenant": "Tenant",
             "Tenant App Key": "Tenant App Key",
             "Tenant Id": "Tenant Id",
+            "Term Variations": "Term Variations",
             "Terms vary based on loan cycle": "Terms vary based on loan cycle",
             "Text": "Text",
             "Theme": "Theme",
@@ -2420,7 +2428,8 @@
             "valid": "valid",
             "INTEREST REFUND": "INTEREST REFUND",
             "Supported Interest Refund Types": "Supported Interest Refund Types",
-            "SUPPORTED REFUND TRANSACTIONS FOR INTEREST REFUND": "Supported interest refund types"
+            "SUPPORTED REFUND TRANSACTIONS FOR INTEREST REFUND": "Supported interest refund types",
+            "Charge-off reason": "Charge-off reason"
         },
         "links": {
             "Community": "Community",
