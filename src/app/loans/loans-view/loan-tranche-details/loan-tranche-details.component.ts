@@ -1,6 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+/**
+ * Copyright since 2025 Mifos Initiative
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
+import { Component, OnInit, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { Dates } from 'app/core/utils/dates';
 import { LoansService } from 'app/loans/loans.service';
 import { DisbursementData } from 'app/loans/models/loan-account.model';
@@ -10,7 +18,7 @@ import { FormDialogComponent } from 'app/shared/form-dialog/form-dialog.componen
 import { DatepickerBase } from 'app/shared/form-dialog/formfield/model/datepicker-base';
 import { FormfieldBase } from 'app/shared/form-dialog/formfield/model/formfield-base';
 import { InputBase } from 'app/shared/form-dialog/formfield/model/input-base';
-import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIconButton } from '@angular/material/button';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import {
   MatTable,
@@ -27,7 +35,9 @@ import {
 import { MatTooltip } from '@angular/material/tooltip';
 import { DateFormatPipe } from '../../../pipes/date-format.pipe';
 import { FormatNumberPipe } from '../../../pipes/format-number.pipe';
+import { YesnoPipe } from '../../../pipes/yesno.pipe';
 import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
+import { LoanAccountTabBaseComponent } from '../loan-account-tab-base.component';
 
 @Component({
   selector: 'mifosx-loan-tranche-details',
@@ -49,10 +59,17 @@ import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
     MatRowDef,
     MatRow,
     DateFormatPipe,
-    FormatNumberPipe
+    FormatNumberPipe,
+    YesnoPipe
   ]
 })
-export class LoanTrancheDetailsComponent implements OnInit {
+export class LoanTrancheDetailsComponent extends LoanAccountTabBaseComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private dialog = inject(MatDialog);
+  private loanServices = inject(LoansService);
+  private settingsService = inject(SettingsService);
+  private dateUtils = inject(Dates);
+
   loanDetails: any;
   return: any;
   status: any;
@@ -81,14 +98,8 @@ export class LoanTrancheDetailsComponent implements OnInit {
    * Retrieves the loans data from `resolve`.
    * @param {ActivatedRoute} route Activated Route.
    */
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private dialog: MatDialog,
-    private loanServices: LoansService,
-    private settingsService: SettingsService,
-    private dateUtils: Dates
-  ) {
+  constructor() {
+    super();
     this.route.parent.data.subscribe((data: { loanDetailsData: any }) => {
       this.loanId = data.loanDetailsData.id;
       this.loanDetails = data.loanDetailsData;
@@ -177,7 +188,6 @@ export class LoanTrancheDetailsComponent implements OnInit {
         required: true,
         order: 2
       })
-
     ];
     return formBase;
   }
@@ -273,10 +283,5 @@ export class LoanTrancheDetailsComponent implements OnInit {
         this.reload();
         this.pristine = true;
       });
-  }
-
-  reload() {
-    const url: string = this.router.url;
-    this.router.navigateByUrl(`/clients`, { skipLocationChange: true }).then(() => this.router.navigate([url]));
   }
 }

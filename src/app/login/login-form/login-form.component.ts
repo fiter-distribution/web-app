@@ -1,19 +1,29 @@
+/**
+ * Copyright since 2025 Mifos Initiative
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
 /** Angular Imports */
-import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Component, OnInit, inject } from '@angular/core';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { TranslateService } from '@ngx-translate/core';
 
 /** rxjs Imports */
 import { finalize } from 'rxjs/operators';
 
 /** Custom Services */
 import { AuthenticationService } from '../../core/authentication/authentication.service';
-import { MatFormField, MatPrefix, MatLabel, MatError, MatSuffix } from '@angular/material/form-field';
-import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { MatIconButton, MatButton } from '@angular/material/button';
-import { MatCheckbox } from '@angular/material/checkbox';
+import { MatPrefix } from '@angular/material/form-field';
+import { M3IconComponent } from '../../shared/m3-ui/m3-icon/m3-icon.component';
+import { M3ButtonComponent } from '../../shared/m3-ui/m3-button/m3-button.component';
 import { MatProgressBar } from '@angular/material/progress-bar';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
+
+import { environment } from '../../../environments/environment';
 
 /**
  * Login form component.
@@ -25,29 +35,28 @@ import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
   imports: [
     ...STANDALONE_SHARED_IMPORTS,
     MatPrefix,
-    FaIconComponent,
-    MatIconButton,
-    MatCheckbox,
+    M3IconComponent,
+    M3ButtonComponent,
     MatProgressBar,
     MatProgressSpinner
   ]
 })
 export class LoginFormComponent implements OnInit {
+  private formBuilder = inject(FormBuilder);
+  private authenticationService = inject(AuthenticationService);
+  private translateService = inject(TranslateService);
+  minPasswordLength = environment.minPasswordLength;
+
   /** Login form group. */
   loginForm: FormGroup;
   /** Password input field type. */
   passwordInputType: string = 'password';
   /** True if loading. */
   loading = false;
-
-  /**
-   * @param {FormBuilder} formBuilder Form Builder.
-   * @param {AuthenticationService} authenticationService Authentication Service.
-   */
-  constructor(
-    private formBuilder: FormBuilder,
-    private authenticationService: AuthenticationService
-  ) {}
+  /** Whether OAuth (OIDC or OAuth2) is enabled */
+  oauthEnabled = environment.OIDC.oidcServerEnabled || environment.oauth.enabled;
+  /** Whether remember me functionality is enabled */
+  enableRememberMe = environment.enableRememberMe === true;
 
   /**
    * Creates login form.
@@ -79,26 +88,37 @@ export class LoginFormComponent implements OnInit {
   }
 
   /**
+   * Initiates OAuth/OIDC login flow.
+   * The unified AuthenticationService handles both Fineract OAuth2 and OIDC providers.
+   */
+  loginOAuth() {
+    this.loading = true;
+    this.authenticationService
+      .login()
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+        })
+      )
+      .subscribe({
+        error: (err) => {
+          console.error('OAuth/OIDC login failed:', err);
+        }
+      });
+  }
+
+  /**
    * Toggles the visibility of the password input field.
    *
    * Changes the input type between 'password' and 'text'.
    */
-
   togglePasswordVisibility() {
     this.passwordInputType = this.passwordInputType === 'password' ? 'text' : 'password';
   }
 
   /**
-   * TODO: Decision to be taken on providing this feature.
-   */
-  forgotPassword() {
-    console.log('Forgot Password feature currently unavailable.');
-  }
-
-  /**
    * Creates login form with validation rules.
    */
-
   private createLoginForm() {
     this.loginForm = this.formBuilder.group({
       username: [
@@ -109,7 +129,8 @@ export class LoginFormComponent implements OnInit {
         '',
         [
           Validators.required,
-          Validators.minLength(8)]
+          Validators.minLength(environment.minPasswordLength)
+        ]
       ],
       remember: false
     });
@@ -125,10 +146,17 @@ export class LoginFormComponent implements OnInit {
   getErrorMessage(controlName: string): string {
     const control = this.loginForm.get(controlName);
     if (control?.hasError('required')) {
-      return 'This field is required';
-    } else if (control?.hasError('minlength')) {
-      return `Minimum length is ${control.errors?.minlength.requiredLength}`;
+      return this.translateService.instant('errors.validation.required');
     }
+    if (control?.hasError('minlength')) {
+      const requiredLength = control.errors?.['minlength']?.requiredLength;
+      return this.translateService.instant('errors.validation.minLength', { requiredLength });
+    }
+
     return '';
+  }
+
+  onEnter(event: any): void {
+    this.login();
   }
 }

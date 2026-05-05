@@ -1,5 +1,13 @@
+/**
+ * Copyright since 2025 Mifos Initiative
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
 /** Angular Imports */
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import {
   MatDialogRef,
   MAT_DIALOG_DATA,
@@ -31,26 +39,17 @@ import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
   ]
 })
 export class ClientFamilyMemberDialogComponent implements OnInit {
+  dialogRef = inject<MatDialogRef<ClientFamilyMemberDialogComponent>>(MatDialogRef);
+  private formBuilder = inject(UntypedFormBuilder);
+  private dateUtils = inject(Dates);
+  data = inject(MAT_DIALOG_DATA);
+  private settingsService = inject(SettingsService);
+
   /** Maximum Due Date allowed. */
   maxDate = new Date();
 
   /** Add/Edit family member form. */
   familyMemberForm: UntypedFormGroup;
-
-  /**
-   * @param {MatDialogRef} dialogRef Client Family Member Dialog Reference
-   * @param {FormBuilder} formBuilder Form Builder
-   * @param {Dates} dateUtils Date Utils
-   * @param {any} data Dialog Data
-   * @param {SettingsService} settingsService Setting service
-   */
-  constructor(
-    public dialogRef: MatDialogRef<ClientFamilyMemberDialogComponent>,
-    private formBuilder: UntypedFormBuilder,
-    private dateUtils: Dates,
-    @Inject(MAT_DIALOG_DATA) public data: any,
-    private settingsService: SettingsService
-  ) {}
 
   ngOnInit() {
     this.maxDate = this.settingsService.businessDate;
@@ -70,6 +69,41 @@ export class ClientFamilyMemberDialogComponent implements OnInit {
         dateOfBirth: this.data.member.dateOfBirth && new Date(this.data.member.dateOfBirth)
       });
     }
+
+    // Add subscription to date of birth changes to update age
+    this.familyMemberForm.get('dateOfBirth').valueChanges.subscribe((dateOfBirth: any) => {
+      if (dateOfBirth) {
+        const age = this.calculateAge(dateOfBirth);
+        this.familyMemberForm.get('age').setValue(age);
+      } else {
+        this.familyMemberForm.get('age').setValue('');
+      }
+    });
+
+    // If a date of birth is already set, calculate the age
+    const currentDob = this.familyMemberForm.get('dateOfBirth').value;
+    if (currentDob) {
+      const age = this.calculateAge(currentDob);
+      this.familyMemberForm.get('age').setValue(age);
+    }
+  }
+
+  /**
+   * Calculates age from date of birth
+   * @param {Date} dateOfBirth Date of Birth
+   * @returns {number} Age
+   */
+  calculateAge(dateOfBirth: Date): number {
+    const today = new Date(this.settingsService.businessDate);
+    const birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+
+    return age;
   }
 
   /**
@@ -88,9 +122,7 @@ export class ClientFamilyMemberDialogComponent implements OnInit {
       ],
       qualification: [''],
       age: [
-        '',
-        Validators.required
-      ],
+        { value: '', disabled: true }],
       isDependent: [''],
       relationshipId: [
         '',
@@ -102,10 +134,7 @@ export class ClientFamilyMemberDialogComponent implements OnInit {
       ],
       professionId: [''],
       maritalStatusId: [''],
-      dateOfBirth: [
-        '',
-        Validators.required
-      ]
+      dateOfBirth: ['']
     });
   }
 
@@ -113,22 +142,43 @@ export class ClientFamilyMemberDialogComponent implements OnInit {
    * Returns Formatted Family Member
    */
   get familyMember() {
-    const familyMemberFormData = this.familyMemberForm.value;
+    // Get form values including disabled controls like age
+    const formValue = {
+      ...this.familyMemberForm.getRawValue()
+    };
+
     const locale = this.settingsService.language.code;
     const dateFormat = this.settingsService.dateFormat;
-    if (familyMemberFormData.dateOfBirth instanceof Date) {
-      familyMemberFormData.dateOfBirth = this.dateUtils.formatDate(familyMemberFormData.dateOfBirth, dateFormat);
+    const prevDateOfBirth: Date = formValue.dateOfBirth;
+
+    // Calculate age from dateOfBirth if present
+    if (prevDateOfBirth) {
+      if (formValue.dateOfBirth instanceof Date) {
+        formValue.dateOfBirth = this.dateUtils.formatDate(prevDateOfBirth, dateFormat);
+      }
+      // Ensure age is calculated even if it wasn't already
+      if (!formValue.age && prevDateOfBirth) {
+        formValue.age = this.calculateAge(prevDateOfBirth);
+      }
+    } else {
+      // If no date of birth, remove age and dateOfBirth from submission
+      delete formValue.age;
+      delete formValue.dateOfBirth;
     }
+
     const familyMember = {
-      ...familyMemberFormData,
+      ...formValue,
       dateFormat,
       locale
     };
+
+    // Remove empty fields
     for (const key in familyMember) {
       if (familyMember[key] === '' || familyMember[key] === undefined) {
         delete familyMember[key];
       }
     }
+
     return familyMember;
   }
 }

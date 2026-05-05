@@ -1,8 +1,22 @@
+/**
+ * Copyright since 2025 Mifos Initiative
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
 /** Angular Imports */
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HttpBackend, HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import {
+  HttpBackend,
+  HttpClient,
+  provideHttpClient,
+  withInterceptorsFromDi,
+  HTTP_INTERCEPTORS
+} from '@angular/common/http';
 
 /** Environment Configuration */
 
@@ -34,6 +48,7 @@ import { CollectionsModule } from './collections/collections.module';
 import { ProfileModule } from './profile/profile.module';
 import { TasksModule } from './tasks/tasks.module';
 import { ConfigurationWizardModule } from './configuration-wizard/configuration-wizard.module';
+import { RemittancesModule } from './remittances/remittances.module';
 import { PortalModule } from '@angular/cdk/portal';
 
 /** Main Routing Module */
@@ -46,6 +61,14 @@ import {
   MissingTranslationHandlerParams
 } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+
+import { AuthenticationInterceptor as TokenInterceptor } from './core/authentication/authentication.interceptor';
+import { TokenInterceptor as ZitadelTokenInterceptor } from './zitadel/token.interceptor';
+import { AuthService } from './zitadel/auth.service';
+import { environment } from '../environments/environment';
+import { CallbackComponent } from './zitadel/callback/callback.component';
+import { OAuthModule } from 'angular-oauth2-oidc';
+import { provideLottieOptions } from 'ngx-lottie';
 
 export class CustomMissingTranslationHandler implements MissingTranslationHandler {
   handle(params: MissingTranslationHandlerParams): string {
@@ -106,12 +129,23 @@ export function HttpLoaderFactory(http: HttpClient) {
     CollectionsModule,
     TasksModule,
     ConfigurationWizardModule,
+    RemittancesModule,
     AppRoutingModule,
-    NotFoundComponent
-
+    NotFoundComponent,
+    CallbackComponent,
+    OAuthModule.forRoot()
   ],
   providers: [
     DatePipe,
-    provideHttpClient(withInterceptorsFromDi())]
+    AuthService,
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: !environment.OIDC.oidcServerEnabled ? TokenInterceptor : ZitadelTokenInterceptor,
+      multi: true
+    },
+    provideLottieOptions({
+      player: () => import('lottie-web')
+    })
+  ]
 })
 export class AppModule {}

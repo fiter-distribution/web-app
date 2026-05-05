@@ -1,5 +1,13 @@
+/**
+ * Copyright since 2025 Mifos Initiative
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
 /** Angular Imports */
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import {
   UntypedFormGroup,
   UntypedFormBuilder,
@@ -7,12 +15,13 @@ import {
   UntypedFormControl,
   ReactiveFormsModule
 } from '@angular/forms';
-import { Router, ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
 /** Custom Services */
 import { ClientsService } from 'app/clients/clients.service';
 import { Dates } from 'app/core/utils/dates';
 import { SettingsService } from 'app/settings/settings.service';
+import { ClientActionNotifierService } from '../client-action-notifier.service';
 import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
 
 /**
@@ -27,6 +36,13 @@ import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
   ]
 })
 export class AddClientChargeComponent implements OnInit {
+  private readonly formBuilder = inject(UntypedFormBuilder);
+  private readonly route = inject(ActivatedRoute);
+  private readonly dateUtils = inject(Dates);
+  private readonly clientsService = inject(ClientsService);
+  private readonly settingsService = inject(SettingsService);
+  private readonly notifier = inject(ClientActionNotifierService);
+
   /** Minimum Due Date allowed. */
   minDate = new Date(2000, 0, 1);
   /** Maximum Due Date allowed. */
@@ -42,21 +58,8 @@ export class AddClientChargeComponent implements OnInit {
 
   /**
    * Retrieves charge template data from `resolve`
-   * @param {FormBuilder} formBuilder Form Builder
-   * @param {ActivatedRoute} route Activated Route
-   * @param {Router} router Router
-   * @param {Dates} dateUtils Date Utils
-   * @param {ClientsService} clientsService Clients Service
-   * @param {SettingsService} settingsService Setting service
    */
-  constructor(
-    private formBuilder: UntypedFormBuilder,
-    private route: ActivatedRoute,
-    private router: Router,
-    private dateUtils: Dates,
-    private clientsService: ClientsService,
-    private settingsService: SettingsService
-  ) {
+  constructor() {
     this.route.data.subscribe((data: { clientActionData: any }) => {
       this.clientChargeOptions = data.clientActionData.chargeOptions;
     });
@@ -138,7 +141,7 @@ export class AddClientChargeComponent implements OnInit {
       clientCharge.feeInterval = this.chargeDetails.feeInterval;
     }
     if (this.chargeDetails.dueDateNotRequired !== true) {
-      if (this.chargeDetails.chargeTimeTypeAnnualOrMonth === true) {
+      if (this.chargeDetails.chargeTimeTypeAnnualOrMonth) {
         const monthDayFormat = 'MMMM-dd'; // TODO: Update once language and date settings are setup
         clientCharge.monthDayFormat = monthDayFormat;
         if (clientCharge.feeOnMonthDay) {
@@ -154,8 +157,9 @@ export class AddClientChargeComponent implements OnInit {
         }
       }
     }
-    this.clientsService.createClientCharge(this.clientId, clientCharge).subscribe(() => {
-      this.router.navigate(['../../'], { relativeTo: this.route });
+    this.clientsService.createClientCharge(this.clientId, clientCharge).subscribe({
+      next: () => this.notifier.notifyAndNavigate('clients.actions.addCharge.success', this.route),
+      error: () => this.notifier.notify('clients.actions.addCharge.failure')
     });
   }
 }

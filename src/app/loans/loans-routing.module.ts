@@ -1,3 +1,11 @@
+/**
+ * Copyright since 2025 Mifos Initiative
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
 /** Angular Imports */
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
@@ -29,6 +37,7 @@ import { ExportTransactionsComponent } from './loans-view/transactions/export-tr
 import { GlimAccountComponent } from './glim-account/glim-account.component';
 import { CreateGlimAccountComponent } from './glim-account/create-glim-account/create-glim-account.component';
 import { LoanBuyDownFeesTabComponent } from './loans-view/loan-buy-down-fees-tab/loan-buy-down-fees-tab.component';
+import { LoanAccountDashboardComponent } from './loans-view/loan-account-dashboard/loan-account-dashboard.component';
 
 /** Custom Resolvers */
 import { LoanDetailsResolver } from './common-resolvers/loan-details.resolver';
@@ -66,6 +75,10 @@ import { LoanTermVariationsResolver } from './common-resolvers/loan-term-variati
 import { LoanDeferredIncomeTabComponent } from './loans-view/loan-deferred-income-tab/loan-deferred-income-tab.component';
 import { LoanDeferredIncomeDataResolver } from './common-resolvers/loan-deferred-income-data.resolver';
 import { LoanBuyDownFeesDataResolver } from './common-resolvers/loan-buy-down-fees-data.resolver';
+import { LoanOriginatorsTabComponent } from './loans-view/loan-originators-tab/loan-originators-tab.component';
+import { LoanOriginatorsResolver } from './common-resolvers/loan-originators.resolver';
+import { LoanProductsResolver } from './common-resolvers/loan-products.resolver';
+import { LoanDelinquencyRangeScheduleResolver } from './common-resolvers/working-capital/loan-delinquency-actions.resolver';
 
 /** Loans Route. */
 const routes: Routes = [
@@ -78,7 +91,8 @@ const routes: Routes = [
         data: { title: 'Create Loans Account', breadcrumb: 'Create Loans Account' },
         component: CreateLoansAccountComponent,
         resolve: {
-          loansAccountTemplate: LoansAccountTemplateResolver
+          loansAccountTemplate: LoansAccountTemplateResolver,
+          loanProductsBasicDetails: LoanProductsResolver
         }
       },
       {
@@ -99,11 +113,13 @@ const routes: Routes = [
           {
             path: 'general',
             component: GeneralTabComponent,
-            data: { title: 'General', breadcrumb: 'General', routeParamBreadcrumb: false },
-            resolve: {
-              loanDetailsData: LoanDetailsResolver,
-              loanDatatables: LoanDatatablesResolver
-            }
+            data: { title: 'Loan Account Details', breadcrumb: 'General', routeParamBreadcrumb: false },
+            resolve: {}
+          },
+          {
+            path: 'dashboard',
+            component: LoanAccountDashboardComponent,
+            data: { title: 'Dashboard', breadcrumb: 'Dashboard', routeParamBreadcrumb: false }
           },
           {
             path: 'accountdetail',
@@ -153,7 +169,8 @@ const routes: Routes = [
             resolve: {
               loanDelinquencyTagsData: LoanDelinquencyTagsResolver,
               loanDelinquencyData: LoanDelinquencyDataResolver,
-              loanDelinquencyActions: LoanDelinquencyActionsResolver
+              loanDelinquencyActions: LoanDelinquencyActionsResolver,
+              wcLoanDelinquencyRangeSchedule: LoanDelinquencyRangeScheduleResolver
             },
             children: [
               {
@@ -164,7 +181,7 @@ const routes: Routes = [
           },
           {
             path: 'loan-reschedules',
-            data: {},
+            data: { title: 'Loan Reschedules', breadcrumb: 'Loan Reschedules', routeParamBreadcrumb: false },
             resolve: {
               loanRescheduleData: LoanReschedulesResolver
             },
@@ -192,7 +209,6 @@ const routes: Routes = [
             component: LoanTermVariationsTabComponent,
             data: { title: 'Loan Term Variations', breadcrumb: 'Loan Term Variations', routeParamBreadcrumb: false },
             resolve: {
-              loanDetailsData: LoanDetailsResolver,
               interestPausesData: LoanTermVariationsResolver
             }
           },
@@ -264,6 +280,19 @@ const routes: Routes = [
             ]
           },
           {
+            path: 'originators',
+            data: { title: 'Loan Originators', breadcrumb: 'Originators', routeParamBreadcrumb: false },
+            resolve: {
+              loanOriginatorsData: LoanOriginatorsResolver
+            },
+            children: [
+              {
+                path: '',
+                component: LoanOriginatorsTabComponent
+              }
+            ]
+          },
+          {
             path: 'buy-down-fees',
             component: LoanBuyDownFeesTabComponent,
             data: { title: 'Buy Down Fees', breadcrumb: 'Buy Down Fees', routeParamBreadcrumb: false },
@@ -311,6 +340,7 @@ const routes: Routes = [
         data: { title: 'Modify Loans Account', breadcrumb: 'Modify Loans Account', routeParamBreadcrumb: 'Edit' },
         component: EditLoansAccountComponent,
         resolve: {
+          loanProductsBasicDetails: LoanProductsResolver,
           loansAccountAndTemplate: LoansAccountAndTemplateResolver
         }
       },
@@ -418,7 +448,8 @@ const routes: Routes = [
     LoanDelinquencyDataResolver,
     LoanTermVariationsResolver,
     LoanDeferredIncomeDataResolver,
-    LoanBuyDownFeesDataResolver
+    LoanBuyDownFeesDataResolver,
+    LoanProductsResolver
   ]
 })
 export class LoansRoutingModule {}

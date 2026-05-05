@@ -1,3 +1,11 @@
+/**
+ * Copyright since 2025 Mifos Initiative
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({ name: 'statusLookup' })
@@ -34,7 +42,7 @@ export class StatusLookupPipe implements PipeTransform {
       'clientStatusType.withdraw': 'status-withdraw', // write
       'clientStatusType.active': 'status-active',
       'clientStatusType.submitted.and.pending.approval': 'status-pending',
-      'clientStatusTYpe.approved': 'status-approved',
+      'clientStatusType.approved': 'status-approved',
       'clientStatusType.transfer.in.progress': 'status-transfer-progress', // write
       'clientStatusType.transfer.on.hold': 'status-transfer-hold', // write
       'groupingStatusType.active': 'status-active',

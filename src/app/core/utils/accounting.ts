@@ -1,3 +1,11 @@
+/**
+ * Copyright since 2025 Mifos Initiative
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
 import { Injectable } from '@angular/core';
 import { AccountingMapping, GLAccount } from 'app/shared/models/general.model';
 import { OptionData } from 'app/shared/models/option-data.model';
@@ -21,13 +29,20 @@ export class Accounting {
     ];
   }
 
-  public getAccountingRulesForLoans(): string[] {
-    return [
-      'NONE',
-      'Cash',
-      'Accrual (periodic)',
-      'Accrual (upfront)'
-    ];
+  public getAccountingRulesForLoans(isLoanProduct: boolean): string[] {
+    if (isLoanProduct) {
+      return [
+        'NONE',
+        'Cash',
+        'Accrual (periodic)',
+        'Accrual (upfront)'
+      ];
+    } else {
+      return [
+        'NONE',
+        'CASH_BASED'
+      ];
+    }
   }
 
   public getAccountRuleName(value: string): string {

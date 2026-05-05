@@ -1,5 +1,13 @@
+/**
+ * Copyright since 2025 Mifos Initiative
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
 /** Angular Imports */
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 
 /** rxjs Imports */
@@ -12,10 +20,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class TasksService {
-  /**
-   * @param {HttpClient} http Http Client to send requests.
-   */
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
 
   /**
    * Get Maker Checker Data
@@ -39,14 +44,14 @@ export class TasksService {
    * Get Maker Checker Template
    */
   getMakerCheckerTemplate(): Observable<any> {
-    return this.http.get('/makercheckers');
+    return this.http.get('/makercheckers/searchtemplate');
   }
 
   /**
    * Get Grouped Clients Data
    */
   getGroupedClientsData(): Observable<any> {
-    const httpParams = new HttpParams().set('limit', '1000').set('status', 'PENDING');
+    const httpParams = new HttpParams().set('limit', '1000').set('status', 'pending');
     return this.http.get('/clients', { params: httpParams });
   }
 
@@ -61,16 +66,24 @@ export class TasksService {
    * Get all loans to be approved
    */
   getAllLoansToBeApproved(): Observable<any> {
-    const httpParams = new HttpParams().set('limit', '1000').set('status', '100');
+    const httpParams = new HttpParams().set('limit', '1000').set('sqlSearch', 'l.loan_status_id in (100,200)');
     return this.http.get('/loans', { params: httpParams });
   }
 
   /**
-   * Get all loans to be created
+   * Get all loans to be disbursed
    */
   getAllLoansToBeDisbursed(): Observable<any> {
-    const httpParams = new HttpParams().set('limit', '1000').set('status', '200');
+    const httpParams = new HttpParams().set('limit', '1000').set('sqlSearch', 'l.loan_status_id in (200)');
     return this.http.get('/loans', { params: httpParams });
+  }
+
+  /**
+   * Get all savings accounts to be approved
+   */
+  getAllSavingsToBeApproved(): Observable<any> {
+    const httpParams = new HttpParams().set('limit', '1000').set('sqlSearch', 's.status_enum in (100,200)');
+    return this.http.get('/savingsaccounts', { params: httpParams });
   }
 
   /**

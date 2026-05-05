@@ -1,8 +1,19 @@
+/**
+ * Copyright since 2025 Mifos Initiative
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
 import {
   AccountingMapping,
   ChargeOffReasonToExpenseAccountMapping,
   ChargeToIncomeAccountMapping,
+  ClassificationToIncomeAccountMapping,
+  CodeValue,
   Currency,
+  GLAccount,
   PaymentChannelToFundSourceMapping
 } from 'app/shared/models/general.model';
 import { OptionData, StringEnumOptionData } from 'app/shared/models/option-data.model';
@@ -10,6 +21,24 @@ import {
   CreditAllocation,
   PaymentAllocation
 } from '../loan-product-stepper/loan-product-payment-strategy-step/payment-allocation-model';
+
+export const LOAN_PRODUCT_TYPE = {
+  LOAN: 'loan',
+  WORKING_CAPITAL: 'working-capital'
+} as const;
+
+export type LoanProductType = (typeof LOAN_PRODUCT_TYPE)[keyof typeof LOAN_PRODUCT_TYPE];
+
+export const PRODUCT_TYPES = [
+  {
+    type: LOAN_PRODUCT_TYPE.LOAN,
+    label: 'Loan'
+  },
+  {
+    type: LOAN_PRODUCT_TYPE.WORKING_CAPITAL,
+    label: 'Working Capital'
+  }
+] as const;
 
 export interface LoanProduct {
   id: number;
@@ -94,7 +123,8 @@ export interface LoanProduct {
   creditAllocationAllocationTypes: OptionData[];
   multiDisburseLoan: boolean;
   maxTrancheCount: number;
-  disallowExpectedDisbursements: boolean;
+  allowFullTermForTranche: boolean;
+  disallowExpectedDisbursements?: boolean;
   allowApprovedDisbursedAmountsOverApplied: boolean;
   overAppliedNumber: number;
   principalThresholdForLastInstallment: number;
@@ -142,8 +172,11 @@ export interface LoanProduct {
   receivableFeeAccountId?: number;
   receivablePenaltyAccountId?: number;
   transfersInSuspenseAccountId?: number;
+  incomeFromDiscountFeeAccountId?: number;
   writeOffAccountId?: number;
   deferredIncomeLiabilityAccountId?: number;
+  chargeOffExpenseAccountId?: number;
+  chargeOffFraudExpenseAccountId?: number;
   // Advanced Accounting
   paymentChannelToFundSourceMappings?: PaymentChannelToFundSourceMapping[];
   feeToIncomeAccountMappings?: ChargeToIncomeAccountMapping[];
@@ -152,6 +185,16 @@ export interface LoanProduct {
   enableAccrualActivityPosting?: boolean;
   supportedInterestRefundTypes?: StringEnumOptionData[];
   chargeOffBehaviour?: StringEnumOptionData;
+  buydownfeeClassificationToIncomeAccountMappings?: ClassificationToIncomeAccountMapping[];
+  buydownFeeClassificationToIncomeAccountMappings?: ClassificationToIncomeAccountMapping[];
+  capitalizedIncomeClassificationToIncomeAccountMappings?: ClassificationToIncomeAccountMapping[];
+  writeOffReasonsToExpenseMappings?: ChargeOffReasonToExpenseAccountMapping[];
+
+  // Working Capital attributes
+  breach?: Breach;
+  breachId?: number;
+  nearBreach?: NearBreach;
+  nearBreachId?: number;
 }
 
 export interface AllowAttributeOverrides {
@@ -192,4 +235,31 @@ export interface InterestRecalculationData {
   preClosureInterestCalculationStrategy: OptionData;
   allowCompoundingOnEod: boolean;
   disallowInterestCalculationOnPastDue: boolean;
+}
+
+export interface AdvancedMappingDTO {
+  formType: string;
+  values: AccountingMappingDTO[];
+}
+
+export interface AccountingMappingDTO {
+  value: CodeValue;
+  glAccount: GLAccount;
+}
+
+export interface Breach {
+  id: number;
+  name: string;
+  breachFrequency: number;
+  breachFrequencyType: StringEnumOptionData;
+  breachAmountCalculationType: StringEnumOptionData;
+  breachAmount: number;
+}
+
+export interface NearBreach {
+  id: number;
+  name: string;
+  frequency: number;
+  frequencyType: StringEnumOptionData;
+  threshold: number;
 }

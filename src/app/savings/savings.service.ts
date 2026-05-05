@@ -1,9 +1,17 @@
+/**
+ * Copyright since 2025 Mifos Initiative
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
 /** Angular Imports */
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 
 /** rxjs Imports */
-import { Observable } from 'rxjs';
+import { Observable, map, switchMap } from 'rxjs';
 
 /**
  * Savings Service.
@@ -12,7 +20,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class SavingsService {
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
 
   /**
    * @param {string} savingAccountId is saving account's Id.
@@ -61,8 +69,23 @@ export class SavingsService {
    * @returns {Observable<any>} Savings account and template.
    */
   getSavingsAccountAndTemplate(accountId: string, template: boolean): Observable<any> {
-    const httpParams = new HttpParams().set('template', template.toString()).set('associations', 'charges');
-    return this.http.get(`/savingsaccounts/${accountId}`, { params: httpParams });
+    if (!template) {
+      return this.getSavingsAccountData(accountId);
+    }
+
+    return this.getSavingsAccountData(accountId).pipe(
+      switchMap((savingsAccountData: any) => {
+        const entityId = savingsAccountData.groupId || savingsAccountData.clientId;
+        const isGroup = !!savingsAccountData.groupId;
+
+        return this.getSavingsAccountTemplate(entityId, savingsAccountData.savingsProductId, isGroup).pipe(
+          map((savingsAccountTemplate: any) => ({
+            ...savingsAccountData,
+            productOptions: savingsAccountTemplate.productOptions
+          }))
+        );
+      })
+    );
   }
 
   /**

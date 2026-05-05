@@ -1,5 +1,13 @@
+/**
+ * Copyright since 2025 Mifos Initiative
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
 /** Angular Imports */
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 
 /** Custom Models */
@@ -46,6 +54,9 @@ import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
   ]
 })
 export class ClientAddressStepComponent {
+  private dialog = inject(MatDialog);
+  private translateService = inject(TranslateService);
+
   /** Client Address Field Config */
   @Input() clientAddressFieldConfig: any;
   /** Client Template */
@@ -58,10 +69,7 @@ export class ClientAddressStepComponent {
    * @param {MatDialog} dialog Mat Dialog
    * @param {TranslateService} translateService Translate Service.
    */
-  constructor(
-    private dialog: MatDialog,
-    private translateService: TranslateService
-  ) {
+  constructor() {
     this.clientAddressData = [];
   }
 
@@ -163,7 +171,7 @@ export class ClientAddressStepComponent {
    * @param {any} address Address
    */
   getSelectedValue(fieldName: any, fieldId: any) {
-    return this.clientTemplate.address[0][fieldName].find((fieldObj: any) => fieldObj.id === fieldId);
+    return this.clientTemplate?.address?.[0]?.[fieldName]?.find((fieldObj: any) => fieldObj.id === fieldId);
   }
 
   /**
@@ -173,9 +181,14 @@ export class ClientAddressStepComponent {
   getAddressFormFields(address?: any) {
     let formfields: FormfieldBase[] = [];
 
-    for (let index = 0; index < this.clientTemplate.address[0].addressTypeIdOptions.length; index++) {
-      this.clientTemplate.address[0].addressTypeIdOptions[index].name = this.translateService.instant(
-        `labels.catalogs.${this.clientTemplate.address[0].addressTypeIdOptions[index].name}`
+    const addressTemplate = this.clientTemplate?.address?.[0];
+    if (!addressTemplate) {
+      return formfields;
+    }
+
+    for (let index = 0; index < (addressTemplate.addressTypeIdOptions?.length ?? 0); index++) {
+      addressTemplate.addressTypeIdOptions[index].name = this.translateService.instant(
+        `labels.catalogs.${addressTemplate.addressTypeIdOptions[index].name}`
       );
     }
 
@@ -185,9 +198,20 @@ export class ClientAddressStepComponent {
             controlName: 'addressTypeId',
             label: this.translateService.instant('labels.inputs.Address Type'),
             value: address ? address.addressTypeId : '',
-            options: { label: 'name', value: 'id', data: this.clientTemplate.address[0].addressTypeIdOptions },
+            options: { label: 'name', value: 'id', data: addressTemplate.addressTypeIdOptions ?? [] },
             order: 1,
             required: true
+          })
+        : null
+    );
+    formfields.push(
+      this.isFieldEnabled('postalCode')
+        ? new InputBase({
+            controlName: 'postalCode',
+            label: this.translateService.instant('labels.inputs.Postal Code'),
+            value: address ? address.postalCode : '',
+            type: 'text',
+            order: 2
           })
         : null
     );
@@ -199,7 +223,7 @@ export class ClientAddressStepComponent {
             value: address ? address.street : '',
             type: 'text',
             required: true,
-            order: 2
+            order: 3
           })
         : null
     );
@@ -264,7 +288,7 @@ export class ClientAddressStepComponent {
             controlName: 'stateProvinceId',
             label: this.translateService.instant('labels.inputs.State / Province'),
             value: address ? address.stateProvinceId : '',
-            options: { label: 'name', value: 'id', data: this.clientTemplate.address[0].stateProvinceIdOptions },
+            options: { label: 'name', value: 'id', data: addressTemplate.stateProvinceIdOptions ?? [] },
             order: 8
           })
         : null
@@ -286,19 +310,8 @@ export class ClientAddressStepComponent {
             controlName: 'countryId',
             label: this.translateService.instant('labels.inputs.Country'),
             value: address ? address.countryId : '',
-            options: { label: 'name', value: 'id', data: this.clientTemplate.address[0].countryIdOptions },
+            options: { label: 'name', value: 'id', data: addressTemplate.countryIdOptions ?? [] },
             order: 10
-          })
-        : null
-    );
-    formfields.push(
-      this.isFieldEnabled('postalCode')
-        ? new InputBase({
-            controlName: 'postalCode',
-            label: this.translateService.instant('labels.inputs.Postal Code'),
-            value: address ? address.postalCode : '',
-            type: 'text',
-            order: 11
           })
         : null
     );

@@ -1,5 +1,13 @@
+/**
+ * Copyright since 2025 Mifos Initiative
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
 /** Angular Imports */
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
@@ -23,7 +31,7 @@ import { DeleteDialogComponent } from 'app/shared/delete-dialog/delete-dialog.co
 import { TranslateService } from '@ngx-translate/core';
 import { ProductsService } from 'app/products/products.service';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { NgClass } from '@angular/common';
+
 import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
 
 /**
@@ -42,7 +50,6 @@ import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
     MatHeaderCellDef,
     MatHeaderCell,
     MatSortHeader,
-    NgClass,
     MatCellDef,
     MatCell,
     MatHeaderRowDef,
@@ -53,6 +60,12 @@ import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
   ]
 })
 export class ViewProductMixComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private dialog = inject(MatDialog);
+  private productsService = inject(ProductsService);
+  private router = inject(Router);
+  private translateService = inject(TranslateService);
+
   /** Product mix data. */
   productMixData: any;
   /** Allowed products datasource. */
@@ -78,13 +91,7 @@ export class ViewProductMixComponent implements OnInit {
    * @param {ActivatedRoute} route Activated Route.
    * @param {TranslateService} translateService Translate Service.
    */
-  constructor(
-    private route: ActivatedRoute,
-    private dialog: MatDialog,
-    private productsService: ProductsService,
-    private router: Router,
-    private translateService: TranslateService
-  ) {
+  constructor() {
     this.route.data.subscribe((data: { productMix: any }) => {
       this.productMixData = data.productMix;
     });

@@ -1,4 +1,12 @@
-import { Component, OnInit, TemplateRef, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+/**
+ * Copyright since 2025 Mifos Initiative
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
+import { Component, OnInit, TemplateRef, ElementRef, ViewChild, AfterViewInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UntypedFormGroup, UntypedFormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import * as _ from 'lodash';
@@ -7,9 +15,10 @@ import * as _ from 'lodash';
 import { PopoverService } from '../../configuration-wizard/popover/popover.service';
 import { ConfigurationWizardService } from '../../configuration-wizard/configuration-wizard.service';
 import { SystemService } from '../system.service';
+import { TranslateService } from '@ngx-translate/core';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { MatList, MatListItem } from '@angular/material/list';
-import { NgFor, NgClass, NgIf } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { MatDivider } from '@angular/material/divider';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
@@ -50,6 +59,14 @@ interface SubmitPermissionData {
   ]
 })
 export class ConfigureMakerCheckerTasksComponent implements OnInit, AfterViewInit {
+  private route = inject(ActivatedRoute);
+  private systemService = inject(SystemService);
+  private formBuilder = inject(UntypedFormBuilder);
+  private router = inject(Router);
+  private configurationWizardService = inject(ConfigurationWizardService);
+  private popoverService = inject(PopoverService);
+  private translateService = inject(TranslateService);
+
   permissionsData: Permission[] = [];
   groupings: string[] = [];
   currentGrouping = '';
@@ -82,14 +99,7 @@ export class ConfigureMakerCheckerTasksComponent implements OnInit, AfterViewIni
    * @param {ConfigurationWizardService} configurationWizardService ConfigurationWizard Service.
    * @param {PopoverService} popoverService PopoverService.
    */
-  constructor(
-    private route: ActivatedRoute,
-    private systemService: SystemService,
-    private formBuilder: UntypedFormBuilder,
-    private router: Router,
-    private configurationWizardService: ConfigurationWizardService,
-    private popoverService: PopoverService
-  ) {
+  constructor() {
     this.route.data.subscribe((data: { permissions: any }) => {
       this.permissionsData = data.permissions;
     });
@@ -156,29 +166,64 @@ export class ConfigureMakerCheckerTasksComponent implements OnInit, AfterViewIni
     }
   }
 
-  permissionName = function (name: any) {
-    name = name || '';
-    // replace '_' with ' '
-    name = name.replace(/_/g, ' ');
-    // for reorts replace read with view
-    if (this.previousGrouping === 'report') {
-      name = name.replace(/READ/g, 'View');
-    }
-    return name;
-  };
+  permissionName(name: string): string {
+    name = (name || '').trim();
 
-  formatName = function (stringVal: string) {
-    stringVal = stringVal || '';
-    if (stringVal.indexOf('portfolio_') > -1) {
-      stringVal = stringVal.replace('portfolio_', '');
+    // Special case: reports replace READ with View
+    if (this.previousGrouping === 'report') {
+      name = name.replace(/^READ_/, 'VIEW_');
     }
-    if (stringVal.indexOf('transaction_') > -1) {
-      const temp = stringVal.split('_');
-      stringVal = temp[1] + ' ' + temp[0].charAt(0).toUpperCase() + temp[0].slice(1) + 's';
+
+    // Split into action + entity at the first underscore
+    const underscoreIndex = name.indexOf('_');
+    if (underscoreIndex === -1) {
+      const key = `labels.permissions.actions.${name}`;
+      const t = this.translateService.instant(key);
+      return t !== key ? t : this.titleCase(name);
     }
-    stringVal = stringVal.charAt(0).toUpperCase() + stringVal.slice(1);
-    return stringVal;
-  };
+
+    const action = name.substring(0, underscoreIndex);
+    const entity = name.substring(underscoreIndex + 1);
+
+    const actionKey = `labels.permissions.actions.${action}`;
+    const translatedAction = this.translateService.instant(actionKey);
+    const actionResult = translatedAction !== actionKey ? translatedAction : this.titleCase(action);
+
+    const entityKey = `labels.permissions.entities.${entity}`;
+    const translatedEntity = this.translateService.instant(entityKey);
+    const entityResult = translatedEntity !== entityKey ? translatedEntity : this.titleCase(entity.replace(/_/g, ' '));
+
+    return `${actionResult} ${entityResult}`;
+  }
+
+  formatName(string: string): string {
+    if (!string) {
+      return string;
+    }
+    // Try to translate first
+    const translationKey = `labels.catalogs.${string}`;
+    const translated = this.translateService.instant(translationKey);
+
+    // If translation exists (and is different from key), use it
+    if (translated && translated !== translationKey) {
+      return translated;
+    }
+
+    // Otherwise, format the original string
+    if (string.indexOf('portfolio_') > -1) {
+      string = string.replace('portfolio_', '');
+    }
+    if (string.indexOf('transaction_') > -1) {
+      const temp = string.split('_');
+      string = temp[1] + ' ' + temp[0].charAt(0).toUpperCase() + temp[0].slice(1) + 's';
+    }
+    string = string.charAt(0).toUpperCase() + string.slice(1);
+    return string;
+  }
+
+  private titleCase(str: string): string {
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  }
 
   /**
    * Backups the valued
@@ -250,12 +295,12 @@ export class ConfigureMakerCheckerTasksComponent implements OnInit, AfterViewIni
    * To show popover.
    */
   ngAfterViewInit() {
-    if (this.configurationWizardService.showMakerCheckerTablePage === true) {
+    if (this.configurationWizardService.showMakerCheckerTablePage) {
       setTimeout(() => {
         this.showPopover(this.templateButtonEdit, this.buttonEdit.nativeElement, 'bottom', true);
       });
     }
-    if (this.configurationWizardService.showMakerCheckerTableList === true) {
+    if (this.configurationWizardService.showMakerCheckerTableList) {
       setTimeout(() => {
         this.showPopover(this.templateMcTable, this.mcTable.nativeElement, 'top', true);
       });
