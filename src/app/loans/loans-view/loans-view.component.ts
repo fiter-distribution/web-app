@@ -7,7 +7,8 @@
  */
 
 /** Angular Imports */
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, NavigationExtras, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 
@@ -26,7 +27,7 @@ import { DelinquencyPausePeriod } from '../models/loan-account.model';
 import { TranslateService } from '@ngx-translate/core';
 import { LoanTransaction } from 'app/products/loan-products/models/loan-account.model';
 import { OptionData } from 'app/shared/models/option-data.model';
-import { MatCardHeader, MatCardTitleGroup, MatCardTitle } from '@angular/material/card';
+import { AccountHeaderComponent } from '../../shared/account-header/account-header.component';
 import { SvgIconComponent } from '../../shared/svg-icon/svg-icon.component';
 import { MatTooltip } from '@angular/material/tooltip';
 import { NgClass, CurrencyPipe } from '@angular/common';
@@ -38,7 +39,6 @@ import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 import { MatIcon } from '@angular/material/icon';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { MatTabNav, MatTabLink, MatTabNavPanel } from '@angular/material/tabs';
-import { StatusLookupPipe } from '../../pipes/status-lookup.pipe';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { FormatNumberPipe } from '../../pipes/format-number.pipe';
 import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
@@ -51,11 +51,9 @@ import { LoanProductBaseComponent } from 'app/products/loan-products/common/loan
   styleUrls: ['./loans-view.component.scss'],
   imports: [
     ...STANDALONE_SHARED_IMPORTS,
-    MatCardHeader,
-    MatCardTitleGroup,
+    AccountHeaderComponent,
     SvgIconComponent,
     MatTooltip,
-    MatCardTitle,
     NgClass,
     LongTextComponent,
     AccountNumberComponent,
@@ -72,12 +70,13 @@ import { LoanProductBaseComponent } from 'app/products/loan-products/common/loan
     MatTabNavPanel,
     RouterOutlet,
     CurrencyPipe,
-    StatusLookupPipe,
     DateFormatPipe,
     FormatNumberPipe
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoansViewComponent extends LoanProductBaseComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
   private route = inject(ActivatedRoute);
   loansService = inject(LoansService);
   private translateService = inject(TranslateService);
@@ -117,8 +116,9 @@ export class LoansViewComponent extends LoanProductBaseComponent implements OnIn
     const loansService = this.loansService;
     this.loanProductService.initialize(LoanProductBaseComponent.resolveProductTypeDefault(this.route, 'loan'));
 
-    this.route.data.subscribe(
-      (data: { loanDetailsData: any; loanDatatables: any; loanArrearsDelinquencyConfig: any }) => {
+    this.route.data
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((data: { loanDetailsData: any; loanDatatables: any; loanArrearsDelinquencyConfig: any }) => {
         this.loanDetailsData = data.loanDetailsData;
         if (!this.loanDetailsData.loanProductName) {
           this.loanDetailsData.loanProductName = this.loanDetailsData.product.name;
@@ -145,13 +145,12 @@ export class LoansViewComponent extends LoanProductBaseComponent implements OnIn
           this.filterDatatablesByProduct();
         }
         this.setConditionalButtons();
-      }
-    );
+      });
     this.loanId = this.route.snapshot.params['loanId'];
   }
 
   ngOnInit() {
-    this.route.params.subscribe((params) => {
+    this.route.params.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       if (this.loanId != params['loanId']) {
         this.loanId = params['loanId'];
         this.reload();
@@ -259,7 +258,7 @@ export class LoansViewComponent extends LoanProductBaseComponent implements OnIn
     this.buttonConfig = new LoansAccountButtonConfiguration(this.status, this.loanSubStatus);
     if (this.canShowWorkingCapitalDiscountUpdate()) {
       this.buttonConfig.addButton({
-        name: 'Update discount',
+        name: 'Discount Fee',
         icon: 'edit',
         taskPermissionName: 'UPDATEDISCOUNT_WORKINGCAPITALLOAN'
       });
@@ -469,6 +468,9 @@ export class LoansViewComponent extends LoanProductBaseComponent implements OnIn
       }
     });
     recoverFromGuarantorDialogRef.afterClosed().subscribe((response: any) => {
+      if (!response) {
+        return;
+      }
       if (response.confirm) {
         this.loansService.loanActionButtons(this.loanId, 'recoverGuarantees').subscribe(() => {
           this.reload();
@@ -500,6 +502,9 @@ export class LoansViewComponent extends LoanProductBaseComponent implements OnIn
       }
     });
     undoTransactionAccountDialogRef.afterClosed().subscribe((response: any) => {
+      if (!response) {
+        return;
+      }
       if (response.confirm) {
         let undoCommand: string = '';
         switch (actionName) {
@@ -524,14 +529,20 @@ export class LoansViewComponent extends LoanProductBaseComponent implements OnIn
     if (!this.loanDetailsData) {
       return '';
     }
-    if (this.loanDetailsData.chargedOff) {
-      return 'loanStatusType.chargeoff';
-    }
-    if (this.isContractTermination(this.loanSubStatus)) {
-      return 'loanSubStatusType.contractTermination';
-    }
-    if (this.loanDetailsData.inArrears) {
-      return 'loanStatusType.activeOverdue';
+    if (this.loanProductService.isLoanProduct) {
+      if (this.loanDetailsData.chargedOff) {
+        return 'loanStatusType.chargeoff';
+      }
+      if (this.isContractTermination(this.loanSubStatus)) {
+        return 'loanSubStatusType.contractTermination';
+      }
+      if (this.loanDetailsData.inArrears) {
+        return 'loanStatusType.activeOverdue';
+      }
+    } else if (this.loanProductService.isWorkingCapital) {
+      if (this.loanDetailsData.collectionData?.delinquentDays > 0) {
+        return 'loanStatusType.activeOverdue';
+      }
     }
     return this.loanDetailsData.status?.code;
   }
@@ -543,8 +554,14 @@ export class LoansViewComponent extends LoanProductBaseComponent implements OnIn
     if (this.loanDetailsData.chargedOff) {
       return 'Chargeoff';
     }
-    if (this.loanDetailsData.inArrears) {
-      return 'activeOverdue';
+    if (this.loanProductService.isWorkingCapital) {
+      if (this.loanDetailsData.collectionData?.delinquentDays > 0) {
+        return 'activeOverdue';
+      }
+    } else {
+      if (this.loanDetailsData.inArrears) {
+        return 'activeOverdue';
+      }
     }
     return this.loanDetailsData.status?.code;
   }
@@ -564,6 +581,9 @@ export class LoansViewComponent extends LoanProductBaseComponent implements OnIn
       data: { deleteContext: `with loan id: ${this.loanId}` }
     });
     deleteGuarantorDialogRef.afterClosed().subscribe((response: any) => {
+      if (!response) {
+        return;
+      }
       if (response.delete) {
         this.loansService.deleteLoanAccount(this.loanId).subscribe(() => {
           this.router.navigate(['../../'], { relativeTo: this.route });
@@ -583,6 +603,6 @@ export class LoansViewComponent extends LoanProductBaseComponent implements OnIn
     if (!this.loanProductService.isWorkingCapital || !this.loanDetailsData) {
       return false;
     }
-    return this.loanDetailsData?.status?.active === true;
+    return !this.loanDetailsData?.discount && this.loanDetailsData?.status?.active === true;
   }
 }

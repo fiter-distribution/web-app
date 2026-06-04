@@ -7,9 +7,18 @@
  */
 
 /** Angular Imports */
-import { Component, OnInit, TemplateRef, ElementRef, ViewChild, AfterViewInit, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  TemplateRef,
+  ElementRef,
+  ViewChild,
+  AfterViewInit,
+  inject
+} from '@angular/core';
 import { ActivatedRoute, Router, NavigationEnd, RouterLink } from '@angular/router';
-import { UntypedFormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 
 /** rxjs Imports */
@@ -51,7 +60,8 @@ import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
     MatAutocomplete,
     MatCardImage,
     AsyncPipe
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class HomeComponent implements OnInit, AfterViewInit {
   private authenticationService = inject(AuthenticationService);
@@ -69,7 +79,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
   /** Activity Form. */
   activityForm: any;
   /** Search Text. */
-  searchText: UntypedFormControl = new UntypedFormControl();
+  searchText: FormControl = new FormControl();
   /** Filtered Activities. */
   filteredActivities: Observable<any[]>;
   /** All User Activities. */

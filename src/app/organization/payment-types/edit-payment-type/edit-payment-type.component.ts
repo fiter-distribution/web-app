@@ -7,7 +7,7 @@
  */
 
 /** Angular Imports */
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { UntypedFormGroup, UntypedFormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
@@ -30,7 +30,8 @@ import { STANDALONE_SHARED_IMPORTS } from 'app/standalone-shared.module';
     ...STANDALONE_SHARED_IMPORTS,
     CdkTextareaAutosize,
     MatCheckbox
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditPaymentTypeComponent implements OnInit {
   private formBuilder = inject(UntypedFormBuilder);
@@ -79,7 +80,8 @@ export class EditPaymentTypeComponent implements OnInit {
       ],
       description: [this.paymentTypeData.description],
       isCashPayment: [
-        { value: this.paymentTypeData.isCashPayment, disabled: this.isSystemDefined }],
+        { value: this.paymentTypeData.isCashPayment, disabled: this.isSystemDefined }
+      ],
       position: [
         { value: this.paymentTypeData.position, disabled: this.isSystemDefined },
         [

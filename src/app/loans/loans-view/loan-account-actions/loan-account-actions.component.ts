@@ -7,7 +7,8 @@
  */
 
 /** Angular Imports. */
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LoansAccountCloseComponent } from './loans-account-close/loans-account-close.component';
 import { UndoApprovalComponent } from './undo-approval/undo-approval.component';
@@ -85,9 +86,11 @@ import { UpdateDiscountComponent } from './update-discount/update-discount.compo
     UndoWriteOffComponent,
     AttachOriginatorComponent,
     UpdateDiscountComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoanAccountActionsComponent {
+  private readonly destroyRef = inject(DestroyRef);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
@@ -136,7 +139,7 @@ export class LoanAccountActionsComponent {
     'Buy Down Fee': boolean;
     'Undo Write-off': boolean;
     'Attach Loan Originator': boolean;
-    'Update discount': boolean;
+    'Discount Fee': boolean;
   } = {
     Close: false,
     'Undo Approval': false,
@@ -178,7 +181,7 @@ export class LoanAccountActionsComponent {
     'Buy Down Fee': false,
     'Undo Write-off': false,
     'Attach Loan Originator': false,
-    'Update discount': false
+    'Discount Fee': false
   };
 
   actionButtonData: any;
@@ -192,11 +195,11 @@ export class LoanAccountActionsComponent {
     // Safely access data with optional chaining
     this.navigationData = currentNavigation?.extras?.state?.data;
 
-    this.route.data.subscribe((data: { actionButtonData: any }) => {
+    this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((data: { actionButtonData: any }) => {
       this.actionButtonData = data.actionButtonData ? data.actionButtonData : {};
     });
 
-    this.route.params.subscribe((params) => {
+    this.route.params.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       this.actionName = params['action'];
       if (this.actionName === 'Change Loan Officer') {
         this.actionName = 'Assign Loan Officer';

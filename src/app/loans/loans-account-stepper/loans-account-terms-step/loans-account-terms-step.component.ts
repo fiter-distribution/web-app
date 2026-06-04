@@ -7,7 +7,18 @@
  */
 
 /** Angular Imports */
-import { Component, OnInit, Input, OnChanges, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  OnInit,
+  Input,
+  OnChanges,
+  SimpleChanges,
+  inject
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { UntypedFormGroup, UntypedFormBuilder, Validators, UntypedFormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
@@ -86,12 +97,15 @@ interface DisbursementData {
     DateFormatPipe,
     YesnoPipe,
     BreachDisplayComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoansAccountTermsStepComponent extends LoanProductBaseComponent implements OnInit, OnChanges {
+  private readonly destroyRef = inject(DestroyRef);
   private formBuilder = inject(UntypedFormBuilder);
   private settingsService = inject(SettingsService);
   private route = inject(ActivatedRoute);
+  private cdr = inject(ChangeDetectorRef);
   dialog = inject(MatDialog);
 
   /** Loans Product Options */
@@ -189,7 +203,7 @@ export class LoansAccountTermsStepComponent extends LoanProductBaseComponent imp
   /**
    * Executes on change of input values
    */
-  ngOnChanges() {
+  ngOnChanges(changes: SimpleChanges) {
     if (this.loanProductService.isLoanProduct) {
       if (this.loansAccountProductTemplate) {
         this.currency = this.loansAccountProductTemplate.currency;
@@ -332,13 +346,19 @@ export class LoansAccountTermsStepComponent extends LoanProductBaseComponent imp
       this.delinquencyStartTypeOptions = this.loansAccountTermsData.options?.delinquencyStartTypeOptions;
       this.breachOptions = this.loansAccountTermsData.options?.breachOptions ?? [];
       this.nearBreachOptions = this.loansAccountTermsData.options?.nearBreachOptions ?? [];
+      const templateChange = changes['loansAccountProductTemplate'];
+      const productChanged =
+        !!templateChange &&
+        (templateChange.isFirstChange() ||
+          templateChange.previousValue?.product?.id !== templateChange.currentValue?.product?.id);
+      // Edit Loan
       if (this.loanId != null && 'accountNo' in this.loansAccountTemplate) {
         this.loansAccountTermsData = this.loansAccountTemplate;
         this.loansAccountTermsForm.patchValue({
-          discount: this.loansAccountTermsData.discount || '',
+          discount: this.loansAccountTermsData.discountProposed || this.loansAccountTermsData.discount || '',
           principalAmount: this.loansAccountTermsData.proposedPrincipal,
           periodPaymentRate: this.loansAccountTermsData.periodPaymentRate,
-          totalPayment: this.loansAccountTermsData.balance?.totalPayment,
+          totalPaymentVolume: this.loansAccountTermsData.totalPaymentVolume,
           repaymentEvery: this.loansAccountTermsData.repaymentEvery,
           repaymentFrequencyType: this.loansAccountTermsData.repaymentFrequencyType?.id,
           delinquencyGraceDays: this.loansAccountTermsData.delinquencyGraceDays,
@@ -346,7 +366,8 @@ export class LoansAccountTermsStepComponent extends LoanProductBaseComponent imp
           breachId: this.loansAccountTermsData.breach?.id,
           nearBreachId: this.loansAccountTermsData.nearBreach?.id
         });
-      } else {
+        // New Loan — solo inicializar si el producto realmente cambió
+      } else if (productChanged) {
         this.loansAccountTermsForm.patchValue({
           discount: this.loansAccountTermsData.product.discount || '',
           principalAmount: this.loansAccountTermsData.product.principal,
@@ -355,6 +376,7 @@ export class LoansAccountTermsStepComponent extends LoanProductBaseComponent imp
           breachId: this.loansAccountTermsData.product.breach?.id || '',
           nearBreachId: this.loansAccountTermsData.product.nearBreach?.id || ''
         });
+        this.cdr.markForCheck();
       }
       this.allowAttributeOverrides = this.loansAccountProductTemplate.product.allowAttributeOverrides;
       if (
@@ -496,42 +518,57 @@ export class LoansAccountTermsStepComponent extends LoanProductBaseComponent imp
     const repaymentFrequencyNthDayType = this.loansAccountTermsForm.get('repaymentFrequencyNthDayType');
     const repaymentFrequencyDayOfWeekType = this.loansAccountTermsForm.get('repaymentFrequencyDayOfWeekType');
 
-    this.loansAccountTermsForm.get('repaymentFrequencyType')?.valueChanges.subscribe((repaymentFrequencyType) => {
-      repaymentFrequencyNthDayType?.setValidators(null);
-      repaymentFrequencyDayOfWeekType?.setValidators(null);
+    this.loansAccountTermsForm
+      .get('repaymentFrequencyType')
+      ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((repaymentFrequencyType) => {
+        repaymentFrequencyNthDayType?.setValidators(null);
+        repaymentFrequencyDayOfWeekType?.setValidators(null);
 
-      setTimeout(() => {
-        repaymentFrequencyNthDayType?.updateValueAndValidity();
-        repaymentFrequencyDayOfWeekType?.updateValueAndValidity();
+        setTimeout(() => {
+          repaymentFrequencyNthDayType?.updateValueAndValidity();
+          repaymentFrequencyDayOfWeekType?.updateValueAndValidity();
+        });
       });
-    });
   }
 
   /** Custom Listeners for the form to calculate Loan Term */
   setLoanTermListener() {
-    this.loansAccountTermsForm.get('numberOfRepayments')?.valueChanges.subscribe((numberOfRepayments) => {
-      const repaymentEvery: number = this.loansAccountTermsForm.value.repaymentEvery;
-      this.calculateLoanTerm(numberOfRepayments, repaymentEvery);
-    });
+    this.loansAccountTermsForm
+      .get('numberOfRepayments')
+      ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((numberOfRepayments) => {
+        const repaymentEvery: number = this.loansAccountTermsForm.value.repaymentEvery;
+        this.calculateLoanTerm(numberOfRepayments, repaymentEvery);
+      });
 
-    this.loansAccountTermsForm.get('repaymentEvery')?.valueChanges.subscribe((repaymentEvery) => {
-      const numberOfRepayments: number = this.loansAccountTermsForm.value.numberOfRepayments;
-      this.calculateLoanTerm(numberOfRepayments, repaymentEvery);
-    });
+    this.loansAccountTermsForm
+      .get('repaymentEvery')
+      ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((repaymentEvery) => {
+        const numberOfRepayments: number = this.loansAccountTermsForm.value.numberOfRepayments;
+        this.calculateLoanTerm(numberOfRepayments, repaymentEvery);
+      });
 
-    this.loansAccountTermsForm.get('loanTermFrequencyType')?.valueChanges.subscribe((loanTermFrequencyType) => {
-      this.loansAccountTermsForm.patchValue({ repaymentFrequencyType: loanTermFrequencyType });
-    });
+    this.loansAccountTermsForm
+      .get('loanTermFrequencyType')
+      ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((loanTermFrequencyType) => {
+        this.loansAccountTermsForm.patchValue({ repaymentFrequencyType: loanTermFrequencyType });
+      });
 
-    this.loansAccountTermsForm.get('amortizationType')?.valueChanges.subscribe((amortizationType) => {
-      if (amortizationType === 0) {
-        // Equal Principal Payments
-        this.loansAccountTermsForm.addControl('fixedPrincipalPercentagePerInstallment', new UntypedFormControl(''));
-      } else {
-        // Equal Installments
-        this.loansAccountTermsForm.removeControl('fixedPrincipalPercentagePerInstallment');
-      }
-    });
+    this.loansAccountTermsForm
+      .get('amortizationType')
+      ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((amortizationType) => {
+        if (amortizationType === 0) {
+          // Equal Principal Payments
+          this.loansAccountTermsForm.addControl('fixedPrincipalPercentagePerInstallment', new UntypedFormControl(''));
+        } else {
+          // Equal Installments
+          this.loansAccountTermsForm.removeControl('fixedPrincipalPercentagePerInstallment');
+        }
+      });
   }
 
   /** Prevent negative values in numeric fields */
@@ -549,7 +586,7 @@ export class LoansAccountTermsStepComponent extends LoanProductBaseComponent imp
     numericFieldsWithMinZero.forEach((fieldName) => {
       const control = this.loansAccountTermsForm.get(fieldName);
       if (control) {
-        control.valueChanges.subscribe((value) => {
+        control.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
           if (typeof value === 'number' && value < 0) {
             control.setValue(0, { emitEvent: false });
           }
@@ -558,7 +595,7 @@ export class LoansAccountTermsStepComponent extends LoanProductBaseComponent imp
     });
     const interestRateControl = this.loansAccountTermsForm.get('interestRatePerPeriod');
     if (interestRateControl) {
-      interestRateControl.valueChanges.subscribe((value) => {
+      interestRateControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
         if (typeof value === 'number' && value < 0.01) {
           interestRateControl.setValue(0.01, { emitEvent: false });
         }
@@ -704,7 +741,7 @@ export class LoansAccountTermsStepComponent extends LoanProductBaseComponent imp
             amountValueValidator()
           ]
         ],
-        totalPayment: [
+        totalPaymentVolume: [
           '',
           [
             Validators.required,
@@ -781,6 +818,7 @@ export class LoansAccountTermsStepComponent extends LoanProductBaseComponent imp
         label: `Principal(It should be less than equal to the ${currentPrincipalAmount})`,
         value: '',
         type: 'number',
+        step: 'any',
         required: true,
         order: 2
       })
